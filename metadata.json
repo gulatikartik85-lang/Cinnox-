@@ -1,0 +1,8 @@
+{
+  "name": "Cinnox",
+  "description": "Create images, logos, videos, AI voices, code, resumes, translations, thumbnails, and social content with Cinnox's 15 integrated studios.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
