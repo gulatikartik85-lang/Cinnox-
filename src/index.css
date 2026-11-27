@@ -3,152 +3,78 @@
 
 @layer base {
   :root {
-    --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
-    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
-
-    /* Default: Signature Purple, Blue & Black Gradient Theme */
-    --accent-from: #8B5CF6;
-    --accent-mid: #4F46E5;
-    --accent-to: #2563EB;
-    --text-grad-from: #C4B5FD;
-    --text-grad-to: #60A5FA;
-    --text-grad-light-from: #6D28D9;
-    --text-grad-light-to: #1D4ED8;
-    --hero-glow-1: rgba(139, 92, 246, 0.34);
-    --hero-glow-2: rgba(37, 99, 235, 0.30);
-    --hero-glow-3: rgba(79, 70, 229, 0.20);
-  }
-
-  :root[data-accent="indigo-cyan"] {
-    --accent-from: #6366F1;
-    --accent-mid: #2563EB;
-    --accent-to: #06B6D4;
-    --text-grad-from: #A5B4FC;
-    --text-grad-to: #22D3EE;
-    --text-grad-light-from: #4338CA;
-    --text-grad-light-to: #0891B2;
-    --hero-glow-1: rgba(99, 102, 241, 0.34);
-    --hero-glow-2: rgba(6, 182, 212, 0.28);
-    --hero-glow-3: rgba(37, 99, 235, 0.22);
-  }
-
-  :root[data-accent="violet-rose"] {
-    --accent-from: #9333EA;
-    --accent-mid: #7C3AED;
-    --accent-to: #EC4899;
-    --text-grad-from: #D8B4FE;
-    --text-grad-to: #F472B6;
-    --text-grad-light-from: #7E22CE;
-    --text-grad-light-to: #DB2777;
-    --hero-glow-1: rgba(147, 51, 234, 0.34);
-    --hero-glow-2: rgba(236, 72, 153, 0.26);
-    --hero-glow-3: rgba(124, 58, 237, 0.22);
-  }
-
-  :root[data-accent="sapphire-emerald"] {
-    --accent-from: #2563EB;
-    --accent-mid: #0EA5E9;
-    --accent-to: #10B981;
-    --text-grad-from: #93C5FD;
-    --text-grad-to: #34D399;
-    --text-grad-light-from: #1D4ED8;
-    --text-grad-light-to: #059669;
-    --hero-glow-1: rgba(37, 99, 235, 0.32);
-    --hero-glow-2: rgba(16, 185, 129, 0.26);
-    --hero-glow-3: rgba(14, 165, 233, 0.22);
+    --hw-accent-from: #0284c7;
+    --hw-accent-to: #059669;
   }
 
   html {
-    font-family: var(--font-body);
+    font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
     scroll-behavior: smooth;
   }
 
-  h1, h2, h3, h4, .font-display {
-    font-family: var(--font-display);
+  h1, h2, h3, .font-display {
+    font-family: "Outfit", "Plus Jakarta Sans", system-ui, sans-serif;
   }
 
-  code, pre, .font-mono, .tabular-nums {
-    font-variant-numeric: tabular-nums;
+  .font-mono {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   }
-}
 
-/* Rich Purple-Blue-Black atmospheric canvas */
-.cinnox-hero-mesh {
-  background:
-    radial-gradient(ellipse 80% 60% at 12% 10%, var(--hero-glow-1), transparent 62%),
-    radial-gradient(ellipse 70% 60% at 88% 18%, var(--hero-glow-2), transparent 62%),
-    radial-gradient(ellipse 55% 45% at 50% 90%, var(--hero-glow-3), transparent 70%),
-    linear-gradient(160deg, #04050B 0%, #0B0E22 48%, #05060E 100%);
-}
+  html.hw-text-lg {
+    font-size: 18px;
+  }
 
-html:not(.dark) .cinnox-hero-mesh {
-  background:
-    radial-gradient(ellipse 75% 55% at 15% 15%, color-mix(in srgb, var(--accent-from) 16%, transparent), transparent 65%),
-    radial-gradient(ellipse 65% 55% at 85% 20%, color-mix(in srgb, var(--accent-to) 14%, transparent), transparent 65%),
-    linear-gradient(160deg, #F8FAFC 0%, #EEF2FF 52%, #F5F3FF 100%);
-}
+  html.hw-text-xl {
+    font-size: 20px;
+  }
 
-.cinnox-accent-gradient {
-  background: linear-gradient(135deg, var(--accent-from) 0%, var(--accent-mid) 50%, var(--accent-to) 100%);
-}
+  html.hw-high-contrast body {
+    filter: contrast(1.08);
+  }
 
-.cinnox-text-gradient {
-  background: linear-gradient(135deg, var(--text-grad-from) 0%, var(--text-grad-to) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-html:not(.dark) .cinnox-text-gradient {
-  background: linear-gradient(135deg, var(--text-grad-light-from) 0%, var(--text-grad-light-to) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.cinnox-card-glow {
-  background: linear-gradient(180deg, rgba(16, 20, 44, 0.92) 0%, rgba(9, 11, 24, 0.96) 100%);
-}
-
-html:not(.dark) .cinnox-card-glow {
-  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFF 100%);
-}
-
-.checkerboard-alpha {
-  background-color: #111426;
-  background-image:
-    linear-gradient(45deg, #1b203a 25%, transparent 25%),
-    linear-gradient(-45deg, #1b203a 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #1b203a 75%),
-    linear-gradient(-45deg, transparent 75%, #1b203a 75%);
-  background-size: 20px 20px;
-  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
-}
-
-html:not(.dark) .checkerboard-alpha {
-  background-color: #f1f5f9;
-  background-image:
-    linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
-    linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
-    linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  html.hw-reduced-motion *,
+  html.hw-reduced-motion *::before,
+  html.hw-reduced-motion *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
-@media print {
-  .no-print {
-    display: none !important;
-  }
-  body {
-    background: #ffffff !important;
-    color: #0f172a !important;
-  }
+.hw-accent-gradient {
+  background: linear-gradient(135deg, var(--hw-accent-from), var(--hw-accent-to));
+}
+
+.hw-text-gradient {
+  background: linear-gradient(135deg, #0ea5e9, #10b981);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hw-hero-mesh {
+  background:
+    radial-gradient(640px circle at 12% 15%, rgba(14, 165, 233, 0.14), transparent 62%),
+    radial-gradient(560px circle at 88% 20%, rgba(16, 185, 129, 0.12), transparent 60%);
+}
+
+.dark .hw-hero-mesh {
+  background:
+    radial-gradient(680px circle at 14% 12%, rgba(14, 165, 233, 0.16), transparent 62%),
+    radial-gradient(600px circle at 86% 24%, rgba(16, 185, 129, 0.13), transparent 62%),
+    #050912;
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }

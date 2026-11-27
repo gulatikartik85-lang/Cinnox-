@@ -15,11 +15,12 @@ export default defineConfig(() => {
         includeAssets: ['icon.svg', 'apple-touch-icon.png'],
         manifest: {
           id: '/',
-          name: 'Cinnox – 15-in-1 AI Studio',
-          short_name: 'Cinnox',
-          description: '15 integrated AI tools for images, logos, videos, voices, code, resumes, translations, and content.',
-          theme_color: '#06070E',
-          background_color: '#06070E',
+          name: 'HelpWorld AI – One App for Everyone',
+          short_name: 'HelpWorld',
+          description:
+            'Solve everyday problems quickly and for free with 14 AI-powered assistance hubs, voice input, image vision, and emergency help.',
+          theme_color: '#050912',
+          background_color: '#050912',
           display: 'standalone',
           start_url: '/',
           scope: '/',
@@ -78,7 +79,7 @@ export default defineConfig(() => {
           ],
         },
         devOptions: {
-          enabled: false,
+          enabled: true,
           type: 'module',
         },
       }),

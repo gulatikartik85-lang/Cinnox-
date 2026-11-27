@@ -1,52 +1,78 @@
 import React, { useMemo, useState } from 'react';
-import { ArrowRight, ExternalLink, Heart, Search, X } from 'lucide-react';
 import {
-  AFFILIATE_PARTNERS,
-  AI_TOOLS,
-  TOOL_CATEGORIES,
-  type ToolCategory,
-} from '../data/toolsCatalog';
-import { ToolIcon } from '../components/ToolIcon';
-import { AdSenseSlot } from '../components/AdSenseSlot';
-import { cinnoxApi, type UserProfile } from '../lib/cinnoxApi';
+  Accessibility,
+  ArrowRight,
+  Globe,
+  Heart,
+  Moon,
+  Search,
+  Siren,
+  Sun,
+  X,
+} from 'lucide-react';
+import {
+  GLOBAL_LANGUAGES,
+  HELP_HUBS,
+  HUB_CATEGORIES,
+  UI_COPY,
+  type HubCategory,
+} from '../data/helpHubs';
+import { HelpHubIcon } from '../components/HelpHubIcon';
+import { AdMobSlot } from '../components/AdMobSlot';
+import { PWAInstallButton } from '../components/PWAAndOffline';
+import { helpworldApi, type AccessibilityPrefs, type UserProfile } from '../lib/helpworldApi';
 
 interface HomePageProps {
-  onNavigate: (path: string) => void;
+  language: string;
+  onChangeLanguage: (lang: string) => void;
+  theme: 'dark' | 'light';
+  onToggleTheme: () => void;
+  accessibility: AccessibilityPrefs;
+  onChangeAccessibility: (next: AccessibilityPrefs) => void;
   user: UserProfile | null;
   onUserUpdated: (user: UserProfile) => void;
+  onNavigate: (path: string) => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
-  onNavigate,
+  language,
+  onChangeLanguage,
+  theme,
+  onToggleTheme,
+  accessibility,
+  onChangeAccessibility,
   user,
   onUserUpdated,
+  onNavigate,
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<'all' | ToolCategory>('all');
-  const [heroImgFailed, setHeroImgFailed] = useState(false);
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState<'all' | HubCategory>('all');
+  const [heroError, setHeroError] = useState(false);
 
-  const filteredTools = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    return AI_TOOLS.filter((tool) => {
-      const catMatch = selectedCategory === 'all' || tool.category === selectedCategory;
-      const searchMatch =
+  const copy = UI_COPY[language] || UI_COPY.English;
+
+  const filteredHubs = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return HELP_HUBS.filter((hub) => {
+      const catOk = category === 'all' || hub.category === category;
+      const textOk =
         !q ||
-        tool.name.toLowerCase().includes(q) ||
-        tool.tagline.toLowerCase().includes(q) ||
-        tool.categoryLabel.toLowerCase().includes(q) ||
-        tool.outputLabel.toLowerCase().includes(q);
-      return catMatch && searchMatch;
+        hub.name.toLowerCase().includes(q) ||
+        hub.hindiName.toLowerCase().includes(q) ||
+        hub.tagline.toLowerCase().includes(q) ||
+        hub.categoryLabel.toLowerCase().includes(q);
+      return catOk && textOk;
     });
-  }, [searchQuery, selectedCategory]);
+  }, [search, category]);
 
-  const handleFavoriteToggle = async (e: React.MouseEvent, slug: string) => {
+  const toggleFav = async (e: React.MouseEvent, slug: string) => {
     e.stopPropagation();
     if (!user) {
       onNavigate('/login');
       return;
     }
     try {
-      const res = await cinnoxApi.toggleFavorite(slug);
+      const res = await helpworldApi.toggleFavorite(slug);
       onUserUpdated(res.user);
     } catch {
       // ignore transient error
@@ -56,99 +82,157 @@ export const HomePage: React.FC<HomePageProps> = ({
   return (
     <main className="pb-8">
       {/* Hero Section */}
-      <section className="cinnox-hero-mesh border-b border-slate-200/80 dark:border-indigo-950/70">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 lg:py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
-            <div className="lg:col-span-7 flex flex-col justify-center space-y-6">
-              <div className="flex items-center gap-2 text-xs font-medium text-violet-700 dark:text-violet-300">
-                <span>Cinnox Platform</span>
+      <section className="hw-hero-mesh border-b border-slate-200/80 dark:border-slate-800/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 lg:py-14 space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+            <div className="lg:col-span-7 flex flex-col justify-center space-y-5">
+              <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-sky-700 dark:text-sky-300">
+                <span>HelpWorld AI</span>
                 <span aria-hidden="true">·</span>
-                <span>15 Production Studios</span>
+                <span>14 Everyday Hubs</span>
                 <span aria-hidden="true">·</span>
-                <span>Unified Workspace</span>
+                <span>Free &amp; Accessible Worldwide</span>
               </div>
 
-              <h1 className="font-display text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.1] max-w-2xl [text-wrap:balance]">
-                Fifteen specialized AI studios inside{' '}
-                <span className="cinnox-text-gradient">one workspace</span>
+              <h1 className="font-display text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.12] max-w-2xl [text-wrap:balance]">
+                {language === 'Hindi' ? (
+                  copy.heroTitle
+                ) : (
+                  <>
+                    One trusted AI app{' '}
+                    <span className="hw-text-gradient">for everyone</span>
+                  </>
+                )}
               </h1>
 
               <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed max-w-xl">
-                Create vector imagery, brand logos, animated WebM video scenes, studio voiceovers,
-                clean source code, tailored resumes, and global translations without switching apps.
+                {copy.heroSub}
               </p>
 
-              {/* Search Bar + Primary CTA */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1 max-w-2xl">
+              {/* Search + Primary CTA */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 max-w-2xl">
                 <div className="relative flex-1">
                   <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="search"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search 15 AI tools (image, logo, video, voice, code...)"
-                    aria-label="Search AI tools"
-                    className="w-full h-11 pl-10 pr-9 rounded-xl border border-slate-300 dark:border-indigo-800/70 bg-white dark:bg-[#0B0E1D] text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder={copy.searchPlaceholder}
+                    aria-label="Search HelpWorld modules"
+                    className="w-full h-12 pl-10 pr-9 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0B1220] text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
                   />
-                  {searchQuery && (
+                  {search && (
                     <button
                       type="button"
-                      onClick={() => setSearchQuery('')}
+                      onClick={() => setSearch('')}
                       aria-label="Clear search"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer"
                     >
                       <X className="w-4 h-4" />
                     </button>
                   )}
                 </div>
 
-                <a
-                  href="#directory"
-                  className="h-11 px-5 rounded-xl cinnox-accent-gradient text-white text-sm font-semibold inline-flex items-center justify-center gap-2 hover:opacity-95 transition-opacity whitespace-nowrap shrink-0"
+                <button
+                  type="button"
+                  onClick={() => onNavigate('/hub/assistant')}
+                  className="min-h-[48px] px-5 rounded-xl hw-accent-gradient text-white text-sm font-semibold inline-flex items-center justify-center gap-2 hover:opacity-95 transition-opacity whitespace-nowrap shrink-0 cursor-pointer"
                 >
-                  <span>Explore All Studios</span>
+                  <span>{copy.openAssistant}</span>
                   <ArrowRight className="w-4 h-4" />
-                </a>
+                </button>
+              </div>
+
+              {/* Quick Language, Theme, Accessibility & Android Install Strip */}
+              <div className="flex flex-wrap items-center gap-2.5 pt-1">
+                <div className="inline-flex items-center gap-2 min-h-[44px] px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B1220]">
+                  <Globe className="w-4 h-4 text-sky-500 shrink-0" />
+                  <select
+                    aria-label="Select global language"
+                    value={language}
+                    onChange={(e) => onChangeLanguage(e.target.value)}
+                    className="bg-transparent text-xs font-semibold text-slate-800 dark:text-slate-100 focus:outline-none cursor-pointer"
+                  >
+                    {GLOBAL_LANGUAGES.map((l) => (
+                      <option key={l.code} value={l.code} className="bg-white dark:bg-[#0B1220]">
+                        {l.label} ({l.native})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={onToggleTheme}
+                  aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                  className="min-h-[44px] px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B1220] text-xs font-semibold text-slate-700 dark:text-slate-200 inline-flex items-center gap-2 hover:border-sky-500 whitespace-nowrap cursor-pointer"
+                >
+                  {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-sky-600" />}
+                  <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    onChangeAccessibility({
+                      ...accessibility,
+                      textScale:
+                        accessibility.textScale === 'normal'
+                          ? 'lg'
+                          : accessibility.textScale === 'lg'
+                            ? 'xl'
+                            : 'normal',
+                    })
+                  }
+                  className="min-h-[44px] px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B1220] text-xs font-semibold text-slate-700 dark:text-slate-200 inline-flex items-center gap-2 hover:border-sky-500 whitespace-nowrap cursor-pointer"
+                >
+                  <Accessibility className="w-4 h-4 text-emerald-500" />
+                  <span>
+                    Text: {accessibility.textScale === 'normal' ? '100%' : accessibility.textScale === 'lg' ? '115%' : '125%'}
+                  </span>
+                </button>
+
+                <PWAInstallButton />
               </div>
             </div>
 
             <div className="lg:col-span-5 flex">
-              <div className="relative w-full min-h-[240px] lg:min-h-[320px] rounded-2xl overflow-hidden border border-slate-200 dark:border-indigo-900/60 bg-[#0A0C18]">
-                {!heroImgFailed ? (
+              <div className="relative w-full min-h-[240px] lg:min-h-[340px] rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-[#0A1322]">
+                {!heroError ? (
                   <img
-                    src="/src/assets/images/hero_cinnox_studio_1795255530135.jpg"
-                    alt="Cinnox obsidian and ultraviolet refraction prisms"
+                    src="/src/assets/images/hero_helpworld_globe_1795768851651.jpg"
+                    alt="HelpWorld AI global pavilion in cyan and emerald daylight"
                     referrerPolicy="no-referrer"
-                    onError={() => setHeroImgFailed(true)}
+                    onError={() => setHeroError(true)}
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full cinnox-hero-mesh flex items-center justify-center p-6 text-center">
-                    <span className="font-display text-2xl font-bold cinnox-text-gradient">
-                      Cinnox Studio
+                  <div className="w-full h-full hw-hero-mesh flex items-center justify-center p-6">
+                    <span className="font-display text-2xl font-bold hw-text-gradient">
+                      HelpWorld AI
                     </span>
                   </div>
                 )}
                 <div className="absolute inset-x-0 bottom-0 p-5 bg-gradient-to-t from-black/85 via-black/45 to-transparent">
-                  <p className="text-xs font-medium text-indigo-200">
-                    Visual, Audio, Code &amp; Editorial Workflows
+                  <p className="text-xs font-medium text-sky-200">
+                    Voice, Vision, Translation &amp; Everyday Guidance
                   </p>
                   <p className="text-sm font-semibold text-white mt-0.5">
-                    Real-time generation with instant export across 15 tools
+                    Accessible on Android, mobile browsers, and desktop
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* 4-column studio summary row below hero */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-10 pt-8 border-t border-slate-200/80 dark:border-indigo-950/60">
+          {/* 4-column summary bar */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 pt-6 border-t border-slate-200/80 dark:border-slate-800/70">
             <div>
               <p className="font-mono tabular-nums text-2xl font-bold text-slate-900 dark:text-white">
-                15
+                14
               </p>
               <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                Dedicated AI tool pages
+                Dedicated AI assistance hubs
               </p>
             </div>
             <div>
@@ -156,303 +240,254 @@ export const HomePage: React.FC<HomePageProps> = ({
                 30+
               </p>
               <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                Global translation languages
+                Hindi, English &amp; world languages
               </p>
             </div>
             <div>
               <p className="font-mono tabular-nums text-2xl font-bold text-slate-900 dark:text-white">
-                5
+                $0
               </p>
               <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                Studio neural voice personas
+                Free everyday core help for everyone
               </p>
             </div>
             <div>
               <p className="font-mono tabular-nums text-2xl font-bold text-slate-900 dark:text-white">
-                100%
+                24/7
               </p>
               <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                Real-time API outputs &amp; exports
+                Offline-ready SOS contact directory
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Top Responsive Google AdSense Banner */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8">
-        <AdSenseSlot variant="banner" pagePath="/" onNavigate={onNavigate} />
+      {/* Emergency Quick Access Strip */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
+        <button
+          type="button"
+          onClick={() => onNavigate('/hub/emergency')}
+          className="w-full rounded-2xl border border-red-300/80 dark:border-red-900/70 bg-red-50/80 dark:bg-red-950/25 px-4 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-left hover:border-red-500 transition-colors cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <Siren className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0" />
+            <span className="text-xs sm:text-sm font-semibold text-red-800 dark:text-red-200">
+              {copy.emergencyBanner}
+            </span>
+          </div>
+          <span className="text-xs font-bold text-red-700 dark:text-red-300 inline-flex items-center gap-1 whitespace-nowrap shrink-0">
+            <span>Open Emergency Help</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </span>
+        </button>
       </div>
 
-      {/* 15 AI Tools Directory */}
-      <section id="directory" className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+      {/* Top Google AdMob Banner Placement */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
+        <AdMobSlot
+          variant="banner"
+          pagePath="/"
+          isPlusUser={user?.isPlus}
+          onOpenPlus={() => onNavigate('/plus')}
+        />
+      </div>
+
+      {/* 14 HelpWorld Modules Directory */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-7">
           <div>
             <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Complete AI Tool Directory
+              Choose How We Can Help Today
             </h2>
             <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-              Select any studio below to launch its dedicated workspace.
+              Tap any card to open its AI hub with voice input, read-aloud audio, and saved history.
             </p>
           </div>
 
           <div
             role="tablist"
-            aria-label="Filter AI tools by category"
-            className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-[#0D1020] border border-slate-200 dark:border-indigo-950/70"
+            aria-label="Filter help hubs"
+            className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-[#0B1220] border border-slate-200 dark:border-slate-800"
           >
-            {TOOL_CATEGORIES.map((cat) => {
-              const active = selectedCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                    active
-                      ? 'cinnox-accent-gradient text-white shadow-sm'
-                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              );
-            })}
+            {HUB_CATEGORIES.map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setCategory(cat.id)}
+                className={`min-h-[38px] px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                  category === cat.id
+                    ? 'hw-accent-gradient text-white shadow-sm'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        {filteredTools.length === 0 ? (
-          <div className="rounded-2xl border border-slate-200 dark:border-indigo-950/70 bg-white dark:bg-[#0B0E1D] p-12 text-center space-y-3">
-            <p className="text-base font-semibold text-slate-900 dark:text-white">
-              No AI tools matched "{searchQuery}"
-            </p>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              Try searching for image, logo, video, voice, code, resume, or translator.
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedCategory('all');
-              }}
-              className="px-4 py-2 rounded-lg text-xs font-semibold cinnox-accent-gradient text-white cursor-pointer"
-            >
-              Reset Filters
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-            {filteredTools.map((tool) => {
-              const isFav = Boolean(user?.favoriteTools?.includes(tool.slug));
-              const iconTone =
-                tool.category === 'visual'
-                  ? 'from-violet-600 to-blue-600 text-white'
-                  : tool.category === 'writing'
-                    ? 'from-indigo-600 to-cyan-500 text-white'
-                    : tool.category === 'code_voice'
-                      ? 'from-blue-600 to-emerald-500 text-white'
-                      : 'from-purple-600 to-pink-500 text-white';
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          {filteredHubs.map((hub) => {
+            const isFav = Boolean(user?.favoriteHubs?.includes(hub.slug));
+            const iconTone =
+              hub.slug === 'emergency'
+                ? 'from-red-600 to-rose-500 text-white'
+                : hub.category === 'care_safety'
+                  ? 'from-emerald-600 to-teal-500 text-white'
+                  : hub.category === 'growth'
+                    ? 'from-sky-600 to-blue-600 text-white'
+                    : 'from-cyan-600 to-emerald-500 text-white';
 
-              return (
-                <article
-                  key={tool.slug}
-                  onClick={() => onNavigate(`/tools/${tool.slug}`)}
-                  className="group relative rounded-2xl border border-slate-200 dark:border-indigo-900/70 cinnox-card-glow p-5 hover:border-violet-500 dark:hover:border-violet-400 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex items-start justify-between gap-3 mb-4">
-                      <div
-                        className={`w-10 h-10 rounded-xl bg-gradient-to-br ${iconTone} flex items-center justify-center shadow-sm`}
-                      >
-                        <ToolIcon slug={tool.slug} className="w-5 h-5" />
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={(e) => handleFavoriteToggle(e, tool.slug)}
-                        aria-label={isFav ? `Remove ${tool.name} from favorites` : `Save ${tool.name} to favorites`}
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer ${
-                          isFav
-                            ? 'text-violet-600 dark:text-violet-400 bg-violet-500/10'
-                            : 'text-slate-400 hover:text-violet-600 dark:hover:text-violet-300'
-                        }`}
-                      >
-                        <Heart className={`w-4 h-4 ${isFav ? 'fill-current' : ''}`} />
-                      </button>
+            return (
+              <article
+                key={hub.slug}
+                onClick={() => onNavigate(`/hub/${hub.slug}`)}
+                className="group rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B1220] p-5 hover:border-sky-500 dark:hover:border-sky-400 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-3 mb-4">
+                    <div
+                      className={`w-11 h-11 rounded-xl bg-gradient-to-br ${iconTone} flex items-center justify-center shadow-sm`}
+                    >
+                      <HelpHubIcon slug={hub.slug} className="w-5 h-5" />
                     </div>
 
-                    <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-1.5">
-                      <span className="font-mono tabular-nums">
-                        {String(tool.id).padStart(2, '0')}
-                      </span>
-                      <span aria-hidden="true">·</span>
-                      <span>{tool.categoryLabel}</span>
-                      <span aria-hidden="true">·</span>
-                      <span>{tool.outputLabel}</span>
-                    </div>
-
-                    <h3 className="font-display text-lg font-bold text-slate-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-300 transition-colors">
-                      {tool.name}
-                    </h3>
-
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed">
-                      {tool.tagline}
-                    </p>
+                    <button
+                      type="button"
+                      onClick={(e) => toggleFav(e, hub.slug)}
+                      aria-label={isFav ? `Remove ${hub.name} from favorites` : `Save ${hub.name} to favorites`}
+                      className={`min-h-[44px] min-w-[44px] rounded-xl flex items-center justify-center transition-colors cursor-pointer ${
+                        isFav
+                          ? 'text-sky-600 dark:text-sky-400 bg-sky-500/10'
+                          : 'text-slate-400 hover:text-sky-500'
+                      }`}
+                    >
+                      <Heart className={`w-4 h-4 ${isFav ? 'fill-current' : ''}`} />
+                    </button>
                   </div>
 
-                  <div className="mt-5 pt-3.5 border-t border-slate-100 dark:border-indigo-950/60 flex items-center justify-between text-xs font-semibold text-violet-700 dark:text-violet-300">
-                    <span>Open Studio</span>
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-1.5">
+                    <span className="font-mono tabular-nums">{String(hub.id).padStart(2, '0')}</span>
+                    <span aria-hidden="true">·</span>
+                    <span>{hub.categoryLabel}</span>
+                    <span aria-hidden="true">·</span>
+                    <span>{hub.capabilityLabel}</span>
                   </div>
-                </article>
-              );
-            })}
-          </div>
-        )}
+
+                  <h3 className="font-display text-lg font-bold text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">
+                    {language === 'Hindi' ? hub.hindiName : hub.name}
+                  </h3>
+
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed">
+                    {hub.tagline}
+                  </p>
+                </div>
+
+                <div className="mt-5 pt-3.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs font-semibold text-sky-700 dark:text-sky-300">
+                  <span>Open Hub</span>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </div>
+              </article>
+            );
+          })}
+        </div>
       </section>
 
-      {/* In-Feed AdSense Placement */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-12">
-        <AdSenseSlot variant="infeed" pagePath="/" onNavigate={onNavigate} />
+      {/* Native AdMob Placement */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-10">
+        <AdMobSlot
+          variant="native"
+          pagePath="/"
+          isPlusUser={user?.isPlus}
+          onOpenPlus={() => onNavigate('/plus')}
+        />
       </div>
 
-      {/* Curated Studio Highlights */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-12">
+      {/* Editorial Feature Spotlights */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-          <div className="rounded-2xl border border-slate-200 dark:border-indigo-950/70 bg-white dark:bg-[#0B0E1C] overflow-hidden flex flex-col sm:flex-row">
-            <div className="sm:w-48 h-48 sm:h-auto shrink-0 bg-[#0A0C18]">
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B1220] overflow-hidden flex flex-col sm:flex-row">
+            <div className="sm:w-48 h-48 sm:h-auto shrink-0 bg-slate-900">
               <img
-                src="/src/assets/images/showcase_visual_ai_1795255529935.jpg"
-                alt="Precision lenses for Cinnox Photo and Image Studios"
+                src="/src/assets/images/feature_health_wellness_1795768851576.jpg"
+                alt="Healthy lifestyle notebook and wellness kit"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover"
               />
             </div>
             <div className="p-6 flex flex-col justify-between space-y-4">
               <div>
-                <p className="text-xs font-medium text-violet-600 dark:text-violet-300">
-                  Visual Production Pipeline
+                <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                  Trusted Health &amp; Crisis Guidance
                 </p>
                 <h3 className="font-display text-xl font-bold text-slate-900 dark:text-white mt-1">
-                  Photo Retouching &amp; Background Matte Extraction
+                  Responsible Wellness &amp; Emergency Direction
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
-                  Upload real photos for multimodal color calibration, live before-and-after inspection,
-                  and transparent alpha PNG exports.
+                  Learn healthy routines and nutrition basics safely, with clear medical disclaimers
+                  and instant redirection to local emergency numbers whenever danger is detected.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
-                  onClick={() => onNavigate('/tools/photo-editor')}
-                  className="px-3.5 py-2 rounded-lg text-xs font-semibold cinnox-accent-gradient text-white cursor-pointer"
+                  onClick={() => onNavigate('/hub/health')}
+                  className="min-h-[40px] px-4 py-2 rounded-xl hw-accent-gradient text-white text-xs font-semibold cursor-pointer"
                 >
-                  Launch Photo Editor
+                  Health Guidance
                 </button>
                 <button
                   type="button"
-                  onClick={() => onNavigate('/tools/background-remover')}
-                  className="px-3.5 py-2 rounded-lg text-xs font-semibold border border-slate-200 dark:border-indigo-800/70 text-slate-700 dark:text-slate-200 hover:border-violet-500 cursor-pointer"
+                  onClick={() => onNavigate('/hub/emergency')}
+                  className="min-h-[40px] px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:border-red-500 cursor-pointer"
                 >
-                  Remove Backgrounds
+                  Emergency SOS
                 </button>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 dark:border-indigo-950/70 bg-white dark:bg-[#0B0E1C] overflow-hidden flex flex-col sm:flex-row">
-            <div className="sm:w-48 h-48 sm:h-auto shrink-0 bg-[#0A0C18]">
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B1220] overflow-hidden flex flex-col sm:flex-row">
+            <div className="sm:w-48 h-48 sm:h-auto shrink-0 bg-slate-900">
               <img
-                src="/src/assets/images/showcase_audio_wave_1795255529986.jpg"
-                alt="Studio microphone for Cinnox Voice Generator"
+                src="/src/assets/images/feature_study_career_1795768852492.jpg"
+                alt="Study and small business desk workspace"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover"
               />
             </div>
             <div className="p-6 flex flex-col justify-between space-y-4">
               <div>
-                <p className="text-xs font-medium text-blue-600 dark:text-blue-300">
-                  Audio &amp; Motion Synthesis
+                <p className="text-xs font-medium text-sky-600 dark:text-sky-400">
+                  Education, Work &amp; Financial Literacy
                 </p>
                 <h3 className="font-display text-xl font-bold text-slate-900 dark:text-white mt-1">
-                  Neural Voiceovers &amp; Animated Video Clips
+                  Honest Career Support Without Fake Promises
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
-                  Turn written scripts into broadcast-ready WAV speech audio and render 4-scene
-                  animated WebM video clips directly in your browser.
+                  Prepare for exams, spot fraudulent job listings, build realistic small business
+                  plans, and practice monthly 50/30/20 budgeting.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
-                  onClick={() => onNavigate('/tools/voice-generator')}
-                  className="px-3.5 py-2 rounded-lg text-xs font-semibold cinnox-accent-gradient text-white cursor-pointer"
+                  onClick={() => onNavigate('/hub/student')}
+                  className="min-h-[40px] px-4 py-2 rounded-xl hw-accent-gradient text-white text-xs font-semibold cursor-pointer"
                 >
-                  Launch Voice Studio
+                  Student Help
                 </button>
                 <button
                   type="button"
-                  onClick={() => onNavigate('/tools/video-generator')}
-                  className="px-3.5 py-2 rounded-lg text-xs font-semibold border border-slate-200 dark:border-indigo-800/70 text-slate-700 dark:text-slate-200 hover:border-violet-500 cursor-pointer"
+                  onClick={() => onNavigate('/hub/jobs')}
+                  className="min-h-[40px] px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:border-sky-500 cursor-pointer"
                 >
-                  Create WebM Video
+                  Verified Job Finder
                 </button>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Affiliate Marketing & Partner Stack Section */}
-      <section
-        id="partners"
-        className="max-w-7xl mx-auto px-4 sm:px-6 py-10 border-t border-slate-200 dark:border-indigo-950/70"
-      >
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
-          <div>
-            <h2 className="font-display text-2xl font-bold text-slate-900 dark:text-white">
-              Recommended Creator Stack &amp; Partner Offers
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Affiliate Disclosure: Cinnox may earn a partner commission when you sign up via
-              recommended tools below at no extra cost to you.
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {AFFILIATE_PARTNERS.map((partner) => (
-            <div
-              key={partner.slug}
-              className="rounded-2xl border border-slate-200 dark:border-indigo-950/70 bg-white dark:bg-[#0B0E1C] p-5 flex flex-col justify-between"
-            >
-              <div>
-                <p className="text-xs font-medium text-violet-600 dark:text-violet-300">
-                  {partner.category}
-                </p>
-                <h3 className="font-display text-base font-bold text-slate-900 dark:text-white mt-1">
-                  {partner.name}
-                </h3>
-                <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mt-1">
-                  {partner.offer}
-                </p>
-                <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
-                  {partner.description}
-                </p>
-              </div>
-
-              <a
-                href={partner.url}
-                target="_blank"
-                rel="sponsored noopener noreferrer"
-                onClick={() => cinnoxApi.trackAffiliateClick(partner.slug, partner.name)}
-                className="mt-4 inline-flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-lg border border-slate-200 dark:border-indigo-800/70 text-xs font-semibold text-slate-800 dark:text-slate-100 hover:border-violet-500 transition-colors"
-              >
-                <span>{partner.ctaLabel}</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
-            </div>
-          ))}
         </div>
       </section>
     </main>
